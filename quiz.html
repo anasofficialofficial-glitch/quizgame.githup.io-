@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Quiz</title>
+  <title>IQ & GK Quiz</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,44 +25,63 @@
 const TOTAL_LEVELS = 50;
 const Q_PER_LEVEL = 10;
 
-const questionBank = [];
+let level = 1;
+let qIndex = 0;
+let levelQuestions = [];
 
-/* 🔥 AUTO CREATE 500 DIFFERENT IQ + GK QUESTIONS */
-const baseQuestions = [
-  ["Capital of Pakistan?","Karachi","Lahore","Islamabad","Quetta",2],
-  ["Largest planet?","Earth","Mars","Jupiter","Venus",2],
-  ["Fastest land animal?","Dog","Horse","Cheetah","Lion",2],
-  ["Opposite of Hot?","Warm","Cold","Heat","Cool",1],
-  ["Which is a fruit?","Potato","Carrot","Apple","Onion",2],
-  ["Sun rises from?","North","South","East","West",2],
-  ["Water formula?","CO2","H2O","O2","NaCl",1],
-  ["National animal of Pakistan?","Tiger","Lion","Markhor","Horse",2],
-  ["Largest ocean?","Indian","Pacific","Atlantic","Arctic",1],
-  ["How many days in week?","5","6","7","8",2]
+/* 🧠 GK + IQ DATA (USED TO BUILD DIFFERENT QUESTIONS) */
+const gkData = [
+  ["Capital of Pakistan","Islamabad"],
+  ["Largest planet","Jupiter"],
+  ["Fastest land animal","Cheetah"],
+  ["National animal of Pakistan","Markhor"],
+  ["Largest ocean","Pacific"],
+  ["Opposite of Day","Night"],
+  ["Gas humans breathe","Oxygen"],
+  ["7 days make","Week"],
+  ["Red planet","Mars"],
+  ["Founder of Pakistan","Quaid-e-Azam"],
+  ["Smallest continent","Australia"],
+  ["Water freezes at","0°C"],
+  ["Largest desert","Sahara"],
+  ["National flower of Pakistan","Jasmine"],
+  ["Sun is a","Star"]
 ];
 
-for(let i=0;i<500;i++){
-  let b = baseQuestions[i % baseQuestions.length];
-  questionBank.push({
-    q: b[0] + " ("+(i+1)+")",
-    o: [b[1],b[2],b[3],b[4]],
-    a: b[5]
-  });
+/* 🔥 LEVEL-WISE UNIQUE QUESTION GENERATOR */
+function generateLevelQuestions(lv){
+  let questions = [];
+  for(let i=0;i<Q_PER_LEVEL;i++){
+    let dataIndex = (lv * i + i + lv) % gkData.length;
+    let correct = gkData[dataIndex][1];
+
+    let options = ["London","Asia","Tiger","Saturn","Lion","Asia","Carbon"];
+    options[Math.floor(Math.random()*options.length)] = correct;
+    options = options.slice(0,4);
+
+    if(!options.includes(correct)){
+      options[0] = correct;
+    }
+
+    options.sort(()=>Math.random()-0.5);
+
+    questions.push({
+      q: gkData[dataIndex][0] + " ?",
+      o: options,
+      a: options.indexOf(correct)
+    });
+  }
+  return questions;
 }
 
-let level = 1;
-let index = 0;
-let questions = [];
-
 function loadLevel(){
-  let start = (level-1)*Q_PER_LEVEL;
-  questions = questionBank.slice(start, start+Q_PER_LEVEL);
-  index = 0;
+  levelQuestions = generateLevelQuestions(level);
+  qIndex = 0;
   loadQuestion();
 }
 
 function loadQuestion(){
-  let q = questions[index];
+  let q = levelQuestions[qIndex];
   document.getElementById("level").innerText = "Level " + level;
   document.getElementById("question").innerText = q.q;
 
@@ -72,21 +91,22 @@ function loadQuestion(){
 
   document.getElementById("feedback").innerText = "";
   document.getElementById("progress").innerText =
-    "Question " + (index+1) + " / 10";
+    "Question " + (qIndex+1) + " / 10";
 }
 
 function check(sel){
   let f = document.getElementById("feedback");
-  if(sel === questions[index].a){
+  if(sel === levelQuestions[qIndex].a){
     f.innerHTML = "✅ Correct";
   } else {
     f.innerHTML = "❌ Wrong! Correct: <b>" +
-      questions[index].o[questions[index].a] + "</b>";
+      levelQuestions[qIndex].o[levelQuestions[qIndex].a] + "</b>";
   }
 
-  index++;
+  qIndex++;
+
   setTimeout(()=>{
-    if(index < 10){
+    if(qIndex < Q_PER_LEVEL){
       loadQuestion();
     } else {
       if(level < TOTAL_LEVELS){
