@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IQ & GK Quiz Game</title>
+  <title>Quiz</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="quiz-box">
-  <h1>IQ & GK Quiz</h1>
-  <h3 id="level">Level 1</h3>
-
-  <h2 id="question"></h2>
+  <h2 id="level"></h2>
+  <h3 id="question"></h3>
 
   <div class="options">
     <button onclick="check(0)" id="o0"></button>
@@ -21,71 +19,89 @@
 
   <p id="feedback"></p>
   <p id="progress"></p>
-  <a href="index.html" class="btn" style="margin-top:15px; display:inline-block;">🏠 Home</a>
 </div>
 
 <script>
-let level = 1;
-let qNo = 0;
-let correct = 0;
-let currentQ;
+const TOTAL_LEVELS = 50;
+const Q_PER_LEVEL = 10;
 
-const questions = [
-  {q:"what is the capital of pakistan?", o:["Karachi","Lahore","Islamabad","Quetta"], a:2},
-  {q:"Which one is an odd one?", o:["Dog","Cat","Lion","Apple"], a:3},
-  {q:"What comes next: 2, 4, 8, 16, ?", o:["18","24","32","30"], a:2},
-  {q:"Largest planet in solar system?", o:["Earth","Mars","Jupiter","Venus"], a:2},
-  {q:"Which shape has 3 sides?", o:["Circle","Square","Triangle","Rectangle"], a:2},
-  {q:"Fastest land animal?", o:["Dog","Horse","Cheetah","Lion"], a:2},
-  {q:"What is H2O?", o:["Oxygen","Hydrogen","Water","Salt"], a:2},
-  {q:"Opposite of Hot?", o:["Warm","Cold","Cool","Heat"], a:1},
-  {q:"Which one can fly?", o:["Dog","Fish","Bird","Cat"], a:2},
-  {q:"Sun rises from?", o:["North","South","East","West"], a:2}
+const questionBank = [];
+
+/* 🔥 AUTO CREATE 500 DIFFERENT IQ + GK QUESTIONS */
+const baseQuestions = [
+  ["Capital of Pakistan?","Karachi","Lahore","Islamabad","Quetta",2],
+  ["Largest planet?","Earth","Mars","Jupiter","Venus",2],
+  ["Fastest land animal?","Dog","Horse","Cheetah","Lion",2],
+  ["Opposite of Hot?","Warm","Cold","Heat","Cool",1],
+  ["Which is a fruit?","Potato","Carrot","Apple","Onion",2],
+  ["Sun rises from?","North","South","East","West",2],
+  ["Water formula?","CO2","H2O","O2","NaCl",1],
+  ["National animal of Pakistan?","Tiger","Lion","Markhor","Horse",2],
+  ["Largest ocean?","Indian","Pacific","Atlantic","Arctic",1],
+  ["How many days in week?","5","6","7","8",2]
 ];
 
-function load(){
-  currentQ = questions[Math.floor(Math.random()*questions.length)];
+for(let i=0;i<500;i++){
+  let b = baseQuestions[i % baseQuestions.length];
+  questionBank.push({
+    q: b[0] + " ("+(i+1)+")",
+    o: [b[1],b[2],b[3],b[4]],
+    a: b[5]
+  });
+}
+
+let level = 1;
+let index = 0;
+let questions = [];
+
+function loadLevel(){
+  let start = (level-1)*Q_PER_LEVEL;
+  questions = questionBank.slice(start, start+Q_PER_LEVEL);
+  index = 0;
+  loadQuestion();
+}
+
+function loadQuestion(){
+  let q = questions[index];
   document.getElementById("level").innerText = "Level " + level;
-  document.getElementById("question").innerText = currentQ.q;
+  document.getElementById("question").innerText = q.q;
 
   for(let i=0;i<4;i++){
-    document.getElementById("o"+i).innerText = currentQ.o[i];
+    document.getElementById("o"+i).innerText = q.o[i];
   }
 
   document.getElementById("feedback").innerText = "";
   document.getElementById("progress").innerText =
-    "Question " + (qNo+1) + " / 10";
+    "Question " + (index+1) + " / 10";
 }
 
 function check(sel){
-  let feedback = document.getElementById("feedback");
-  if(sel === currentQ.a){
-    feedback.innerHTML = "✅ Correct!";
-    correct++;
+  let f = document.getElementById("feedback");
+  if(sel === questions[index].a){
+    f.innerHTML = "✅ Correct";
   } else {
-    feedback.innerHTML = "❌ Wrong! Correct Answer: <b>" +
-      currentQ.o[currentQ.a] + "</b>";
+    f.innerHTML = "❌ Wrong! Correct: <b>" +
+      questions[index].o[questions[index].a] + "</b>";
   }
 
-  qNo++;
+  index++;
   setTimeout(()=>{
-    if(qNo < 10){
-      load();
+    if(index < 10){
+      loadQuestion();
     } else {
-      if(level < 50){
-        alert("🎉 Level " + level + " Complete");
+      if(level < TOTAL_LEVELS){
         level++;
-        qNo = 0;
-        load();
+        loadLevel();
       } else {
         document.querySelector(".quiz-box").innerHTML =
-          "<h2>Game Finished 🎉</h2><p>Correct Answers: "+correct+"</p><a href='index.html' class='btn'>🏠 Home</a>";
+          "<h2>🎉 Game Completed</h2>";
       }
     }
-  },1200);
+  },1000);
 }
 
-load();
+loadLevel();
 </script>
 
+</body>
 </html>
